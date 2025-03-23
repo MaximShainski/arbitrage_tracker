@@ -1,2 +1,5 @@
 #Ignore virtual environment
 myenv/
+
+config.json
+__pycache__
