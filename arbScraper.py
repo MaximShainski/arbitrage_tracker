@@ -5,10 +5,11 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 import time
 import math
-from bot_functions import test
 import aiohttp
 import asyncio
 import redis.asyncio as async_redis
+from bot_functions import test, send_odds
+from bot_functions import app
 
 #Limits the amount of concurrent tasks
 semaphore = asyncio.Semaphore(5)
@@ -200,6 +201,8 @@ async def main():
     await calculate_best_odds(r_async)
     print("--- %s seconds ---" % (time.time() - start_time))
     #print(all_games)
+
+    await send_odds(app, str(all_games))
 
 if __name__ == "__main__":
     asyncio.run(main())

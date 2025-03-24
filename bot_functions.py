@@ -1,12 +1,16 @@
 from typing import Final
-from telegram import Update
+from telegram import Update, Bot
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 import json
 
 def load_config():
     with open('config.json', 'r') as file:
-        config = json.load(file)
-    return config
+        return json.load(file)
+
+# Create the bot application instance
+config = load_config()
+TOKEN = config.get("telegram_bot_token")
+app = Application.builder().token(TOKEN).build()
 
 
 #update contains info about the incoming message, like chat ID and text
@@ -15,8 +19,12 @@ def load_config():
 async def start_command(update: Update, context:ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Hello! This is a test! I will add instructions later")
 
-async def send_message_to_chat(update:Update, context: ContextTypes.DEFAULT_TYPE):
-    await context.bot.send_message("test")
+async def send_odds(app: Application, odds):
+    config = load_config()
+    CHAT_ID = config.get("chat_id")
+
+    await app.bot.send_message(chat_id = CHAT_ID, text=odds)
+
 
 async def test(bets):
     await print("hello")
@@ -28,9 +36,6 @@ if __name__ == '__main__':
     CHAT_ID = config.get("chat_id")
     TOKEN = config.get("telegram_bot_token")
     BOT_USERNAME = config.get("bot_username")
-
-    #This initializes the bot
-    app = Application.builder().token(TOKEN).build()
 
     #Commands
     app.add_handler(CommandHandler('start', start_command))
