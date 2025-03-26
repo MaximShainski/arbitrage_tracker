@@ -3,4 +3,6 @@
 Tracking:
     NBA:
         FanDuel,
-        MGM
+        MGM,
+        BetRivers,
+        DraftKings
