@@ -27,6 +27,7 @@ def UTC_to_ET(utc_time_str, add):
     return et_time_str
 
 async def calculate_best_odds(all_games, r_async, total_bet):
+        arb_opportunities = []
         for game in all_games:
             best_pos_odds = await r_async.zrevrange(game, 0, 0, withscores=True) #Gets the highest positive odds, (returns a list of tuples, but in this case just one tuple in the list)
             if not best_pos_odds:  # Check if the list is empty
@@ -47,10 +48,22 @@ async def calculate_best_odds(all_games, r_async, total_bet):
             print(best_pos_odds)
             print(best_neg_odds)
             print(best_neg_score)
-            
-            if(pos_probability + neg_probability < 1): #Checks for arbitrage
+
+            #Need to check if greater than 0 as sometimes both odds are negative leading to a probability far below 0 but no arb
+            if(0 < pos_probability + neg_probability < 1): #Checks for arbitrage
+                #print(await r_async.zrevrange(game, 0, 0))
+                #print(await r_async.zrangebyscore(game, -math.inf, 0))
+                #Checks if the arb found is for the same team on different sites, happens often in live games where the same time has both positive and negative odds
+                pos_team = best_pos_member[0].decode('utf-8').split(":")[-1]
+                neg_team = best_neg_member[0].decode('utf-8').split(":")[-1]
+                if (pos_team == neg_team):
+                    continue
                 total_probability = pos_probability + neg_probability
-                pos_bet = (total_bet /pos_probability)/ total_probability #How much to bet on the positive odds
-                neg_bet = (total_bet /neg_probability)/ total_probability #How much to bet on the negative odds
+                print(pos_probability)
+                print(neg_probability)
+                pos_bet = (total_bet * pos_probability)/ total_probability #How much to bet on the positive odds
+                neg_bet = (total_bet * neg_probability)/ total_probability #How much to bet on the negative odds
+                print(pos_bet)
+                print(neg_bet)
                 
                 print("arb found!!!!!!")
