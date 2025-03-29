@@ -73,7 +73,7 @@ async def draft_kings_NBA(all_games, semaphore, pipeline):
                             away = away_full[0].split()[-1]
                             utc_time_str = event["startEventDate"]
                             utc_time_str = utc_time_str[:-2]  + "Z" #There are 7 0s, datetime only sees 6 for microseconds. Need to add back the Z as that is accounted for
-                            et_time_str = UTC_to_ET(utc_time_str, False)
+                            et_time_str = UTC_to_ET(utc_time_str, 0)
                             away_odds = team_odds.get(away)
                             home_odds = team_odds.get(home)
                             #The negative sign isn't just a hyphen, so int breaks, so must replace with a hyphen. .Replace returns original if replacing char not found

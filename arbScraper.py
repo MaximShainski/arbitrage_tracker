@@ -9,6 +9,7 @@ from NBA.NBA_FanDuel import fan_duel_NBA
 from NBA.NBA_MGM import MGM_NBA
 from NBA.NBA_BetRivers import bet_rivers_NBA
 from NBA.NBA_DraftKings import draft_kings_NBA
+from NBA.NBA_BetSafe import bet_safe_NBA
 from utils import calculate_best_odds
 
 #Limits the amount of concurrent tasks
@@ -37,7 +38,8 @@ class ArbitrageScraper:
             MGM_NBA(self.all_games, self.semaphore, self.pipeline),
             fan_duel_NBA(self.all_games, self.semaphore, self.pipeline),
             bet_rivers_NBA(self.all_games, self.semaphore, self.pipeline),
-            draft_kings_NBA(self.all_games, self.semaphore, self.pipeline)
+            draft_kings_NBA(self.all_games, self.semaphore, self.pipeline),
+            bet_safe_NBA(self.all_games, self.semaphore, self.pipeline)
         )
 
         # Execute all commands in the pipeline

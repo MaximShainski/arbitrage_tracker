@@ -59,7 +59,7 @@ async def bet_rivers_NBA(all_games, semaphore, pipeline):
                     away = away_full[0].split()[-1]
                     #Grab the game time and add 10 minutes, as other sites have time as 10 minutes after game starts
                     utc_time_str = game["start"]
-                    et_time_str = UTC_to_ET(utc_time_str, True)
+                    et_time_str = UTC_to_ET(utc_time_str, 10)
                     for offers in game["betOffers"]:
                         if offers["betDescription"].split()[0] == "Moneyline":
                             for bets in offers["outcomes"]:

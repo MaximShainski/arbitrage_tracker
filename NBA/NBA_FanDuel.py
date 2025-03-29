@@ -28,7 +28,7 @@ async def fan_duel_NBA(all_games, semaphore, pipeline):
                             for runner in item["runners"]: #These are all the teams
                                 team_counter += 1
                                 utc_time_str = item["marketTime"]
-                                et_time_str = UTC_to_ET(utc_time_str, False)
+                                et_time_str = UTC_to_ET(utc_time_str, 0)
                                 away_home = runner["result"]["type"]
                                 if (away_home == "AWAY"):
                                     away = runner['runnerName'].split()[-1]

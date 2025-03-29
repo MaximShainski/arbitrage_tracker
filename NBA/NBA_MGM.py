@@ -42,7 +42,7 @@ async def MGM_NBA(all_games, semaphore, pipeline):
                         for bet in item["optionMarkets"]:
                             if (bet["name"]["value"] == "Money Line"):
                                 utc_time_str = item["startDate"]
-                                et_time_str = UTC_to_ET(utc_time_str, False)
+                                et_time_str = UTC_to_ET(utc_time_str, 0)
                                 for option in bet["options"]:
                                     team_name = option["name"]["value"].split()[-1] #Grabbing just the last word of the name (New York Knicks would turn into Knicks)
                                     american_odds = option["price"]["americanOdds"]

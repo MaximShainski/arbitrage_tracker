@@ -4,7 +4,7 @@ import math
 from rich import print #Makes print look nicer
 
 #Converts utc time to ET time by converting UTC to string, then adding the info that the time is UTC, converting datetime object to ET time, then converting back to time
-def UTC_to_ET(utc_time_str, add):
+def UTC_to_ET(utc_time_str, time_change):
     # List of possible formats, can replace with a hashmap later for efficiency
     time_formats = ["%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ"]
     utc_time = ""
@@ -17,14 +17,20 @@ def UTC_to_ET(utc_time_str, add):
         except ValueError:
             # If the current format fails, continue with the next format
             continue
-    if (add):
-        utc_time = utc_time + timedelta(minutes=10)
+    utc_time = utc_time + timedelta(minutes=time_change)
 
     utc_time = utc_time.replace(tzinfo=ZoneInfo("UTC"))
     et_time = utc_time.astimezone(ZoneInfo("America/New_York"))
     #Reduced it to just hours, as sites are incosistent in their timings, including different formats in the same site
     et_time_str = et_time.strftime("%Y-%m-%dT%H")
     return et_time_str
+
+def decimal_to_american(odds):
+    if (int(odds) < 2):
+        american_odds = round(-100/(odds - 1))
+    else:
+        american_odds = round((odds-1)*100)
+    return american_odds
 
 async def calculate_best_odds(all_games, r_async, total_bet):
         arb_opportunities = []
@@ -67,3 +73,4 @@ async def calculate_best_odds(all_games, r_async, total_bet):
                 print(neg_bet)
                 
                 print("arb found!!!!!!")
+
