@@ -72,6 +72,8 @@ async def bet_safe_NBA(all_games, semaphore, pipeline):
             ) as response:
                 # Read the response content
                 data = await response.json()
+                with open("response.json", "w", encoding="utf-8") as f:
+                    json.dump(data, f, indent=4, ensure_ascii=False)
                 
                 #Grab all the odds for each team (incredibly similar to draft_kings extraction algorithm)
                 team_odds = {}
@@ -91,9 +93,19 @@ async def bet_safe_NBA(all_games, semaphore, pipeline):
                     home = home_full[0].split()[-1]
                     utc_time_str = event["startDate"]
                     utc_time_str = utc_time_str[:-2]  + "Z" #There are 7 0s, datetime only sees 6 for microseconds. Need to add back the Z as that is accounted for
+                    print(utc_time_str)
                     et_time_str = UTC_to_ET(utc_time_str, 5)
+                    #print(team_odds) If the problem comes again where away_odds is nonetype, uncomment this
+                    #print(away)
+                    print(team_odds)
+                    print(away)
                     away_odds = team_odds.get(away)
                     home_odds = team_odds.get(home)
-                    pipeline.zadd(f'NBA:{away}_{home}:{et_time_str}', {f'BetSafe:{away}': int(away_odds)})
-                    pipeline.zadd(f'NBA:{away}_{home}:{et_time_str}', {f'BetSafe:{home}': int(home_odds)})
+                    try:
+                        pipeline.zadd(f'NBA:{away}_{home}:{et_time_str}', {f'BetSafe:{away}': int(away_odds)})
+                        pipeline.zadd(f'NBA:{away}_{home}:{et_time_str}', {f'BetSafe:{home}': int(home_odds)})
+                    except:
+                        print(f'{away_odds} and/or {home_odds} are not correct')
+                        continue
+                    print(f'NBA:{away}_{home}:{et_time_str}')
                     all_games.add(f'NBA:{away}_{home}:{et_time_str}')
