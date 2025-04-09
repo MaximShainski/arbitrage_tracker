@@ -1,6 +1,7 @@
 import aiohttp
 #Will only work if run arbScraper
 from utils import UTC_to_ET
+import json
 
 async def bet_rivers_NBA(all_games, semaphore, pipeline):
     async with semaphore:
@@ -50,6 +51,9 @@ async def bet_rivers_NBA(all_games, semaphore, pipeline):
             ) as response:
                 # Read the response content
                 data = await response.json()
+                with open('output.json', 'w') as f:
+                    json.dump(data, f, indent=4)
+
                 
                 for game in data["items"]:
                     #This grabs the odds. Can be optimized if necessary by choosing specific indices rather than searching, but higher risk
@@ -64,6 +68,9 @@ async def bet_rivers_NBA(all_games, semaphore, pipeline):
                         if offers["betDescription"].split()[0] == "Moneyline":
                             for bets in offers["outcomes"]:
                                 team = bets["label"].split()[-1]
-                                american_odds = bets["oddsAmerican"]
+                                try:
+                                    american_odds = bets["oddsAmerican"]
+                                except:
+                                    continue #This can happen in live games where they close the odds, so oddsAmerican doesn't appear. Need a better long-term solution
                                 pipeline.zadd(f'NBA:{away}_{home}:{et_time_str}', {f'BetRivers:{team}': int(american_odds)})
                                 all_games.add(f'NBA:{away}_{home}:{et_time_str}')

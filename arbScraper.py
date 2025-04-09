@@ -10,12 +10,9 @@ from NBA.NBA_MGM import MGM_NBA
 from NBA.NBA_BetRivers import bet_rivers_NBA
 from NBA.NBA_DraftKings import draft_kings_NBA
 from NBA.NBA_BetSafe import bet_safe_NBA
+from NBA.NBA_BetVictors import bet_victors_NBA
+from NBA.NBA_888 import eightx3_NBA
 from utils import calculate_best_odds
-
-#Limits the amount of concurrent tasks
-semaphore = asyncio.Semaphore(10)
-
-all_games = set()
 
 class ArbitrageScraper:
     def __init__(self, total_bet=100, semaphore_limit=10):
@@ -39,7 +36,9 @@ class ArbitrageScraper:
             fan_duel_NBA(self.all_games, self.semaphore, self.pipeline),
             bet_rivers_NBA(self.all_games, self.semaphore, self.pipeline),
             draft_kings_NBA(self.all_games, self.semaphore, self.pipeline),
-            bet_safe_NBA(self.all_games, self.semaphore, self.pipeline)
+            bet_safe_NBA(self.all_games, self.semaphore, self.pipeline),
+            #bet_victors_NBA(self.all_games, self.semaphore, self.pipeline),
+            #eightx3_NBA(self.all_games, self.semaphore, self.pipeline)
         )
 
         # Execute all commands in the pipeline
@@ -57,10 +56,11 @@ class ArbitrageScraper:
         await self.scrape_sites()
 
         # Calculate the odds after scraping
-        await calculate_best_odds(self.all_games, self.r_async, self.total_bet)
+        arbitrage_messages = await calculate_best_odds(self.all_games, self.r_async, self.total_bet)
 
-        # Send the odds to the bot
-        await send_odds(app, str(self.all_games))
+        # Send the odds to the bot only if there are odds to send
+        if (arbitrage_messages):
+            await send_odds(app, arbitrage_messages)
 
         #Close the redis connection
         await self.r_async.aclose()
@@ -68,7 +68,7 @@ class ArbitrageScraper:
 
 async def main():
     #Initialize the main process
-    arb_scraper = ArbitrageScraper()
+    arb_scraper = ArbitrageScraper(100, 100)
 
     #Start the process
     await arb_scraper.run()

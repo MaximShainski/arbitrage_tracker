@@ -1,6 +1,7 @@
 import aiohttp
 #Will only work if run arbScraper
 from utils import UTC_to_ET
+import json
 
 async def draft_kings_NBA(all_games, semaphore, pipeline):
     async with semaphore:
@@ -58,7 +59,7 @@ async def draft_kings_NBA(all_games, semaphore, pipeline):
                     ) as response:
                         # Read the response content
                         data = await response.json()
-
+                        
                         #First grab all the odds for each team
                         team_odds = {}
                         for team in data["selections"]:

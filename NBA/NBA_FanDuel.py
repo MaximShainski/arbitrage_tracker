@@ -37,7 +37,6 @@ async def fan_duel_NBA(all_games, semaphore, pipeline):
                                     home = runner['runnerName'].split()[-1]
                                     home_odds = runner["winRunnerOdds"]["americanDisplayOdds"]["americanOdds"]
                                 if (team_counter == 2):
-                                    #print(f'NBA:{away}_{home}:{et_time_str}')
                                     pipeline.zadd(f'NBA:{away}_{home}:{et_time_str}', {f'FanDuel:{away}': int(away_odds)})
                                     pipeline.zadd(f'NBA:{away}_{home}:{et_time_str}', {f'FanDuel:{home}': int(home_odds)})
                                     all_games.add(f'NBA:{away}_{home}:{et_time_str}')

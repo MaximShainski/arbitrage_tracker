@@ -33,11 +33,12 @@ def decimal_to_american(odds):
     return american_odds
 
 async def calculate_best_odds(all_games, r_async, total_bet):
-        arb_opportunities = []
+        arbitrage_messages = []
         for game in all_games:
             best_pos_odds = await r_async.zrevrange(game, 0, 0, withscores=True) #Gets the highest positive odds, (returns a list of tuples, but in this case just one tuple in the list)
             if not best_pos_odds:  # Check if the list is empty
                 continue #Maybe change to something else for now? Don't know what happens when there are no NBA games
+            #print(game)
             
             best_pos_member = best_pos_odds[0]
             best_pos_score = best_pos_member[1]  # Extract score
@@ -51,9 +52,15 @@ async def calculate_best_odds(all_games, r_async, total_bet):
             best_neg_score = best_neg_member[1]  # Extract score
             neg_probability = abs(best_neg_score) / (abs(best_neg_score) + 100)  # Convert odds to probability
 
-            print(best_pos_odds)
-            print(best_neg_odds)
-            print(best_neg_score)
+            #print(best_pos_odds)
+            #print(best_neg_odds)
+            #print(best_neg_score)
+
+            #This checks if the current game is already live, avoiding sending it as an arbitrage as they are too risky
+            game_date = game.split(':')[-1]
+            if datetime.strptime(game_date, "%Y-%m-%dT%H") < datetime.now():
+                continue
+            
 
             #Need to check if greater than 0 as sometimes both odds are negative leading to a probability far below 0 but no arb
             if(0 < pos_probability + neg_probability < 1): #Checks for arbitrage
@@ -65,12 +72,17 @@ async def calculate_best_odds(all_games, r_async, total_bet):
                 if (pos_team == neg_team):
                     continue
                 total_probability = pos_probability + neg_probability
-                print(pos_probability)
-                print(neg_probability)
+                #print(pos_probability)
+                #print(neg_probability)
                 pos_bet = (total_bet * pos_probability)/ total_probability #How much to bet on the positive odds
                 neg_bet = (total_bet * neg_probability)/ total_probability #How much to bet on the negative odds
-                print(pos_bet)
-                print(neg_bet)
+
+                pos_bet_site = (best_pos_odds[0][0].decode("utf-8").split(":")[0])
+                neg_bet_site = (best_neg_odds[-1][0].decode("utf-8").split(":")[0])
+                arbitrage_messages.append((f'{pos_team} vs {neg_team} - {pos_bet_site}: {round(pos_bet, 2)} on {pos_team} - {neg_bet_site}: {round(neg_bet, 2)} on {neg_team}'))
                 
                 print("arb found!!!!!!")
+        return arbitrage_messages
+        
+        
 
